@@ -1,67 +1,10 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#20232b">
-<title>PV Photo Studio</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header class="topbar">
-  <div class="brand"><span class="brand-mark">PV</span><div><strong>PV Photo Studio</strong><small>Mobile-friendly image editor</small></div></div>
-  <div class="top-actions">
-    <button id="undoBtn" title="Undo">↶ Undo</button><button id="redoBtn" title="Redo">↷ Redo</button>
-    <button id="exportBtn" class="primary">Export PNG</button>
-  </div>
-</header>
-<div class="app">
-  <aside class="toolbar">
-    <button id="openBtn" class="tool active" title="Open image">▧<span>Open</span></button>
-    <button id="selectBtn" class="tool" title="Select and move">↖<span>Select</span></button>
-    <button id="textBtn" class="tool" title="Add text">T<span>Text</span></button>
-    <button id="rectBtn" class="tool" title="Add rectangle">▱<span>Shape</span></button>
-    <button id="deleteBtn" class="tool" title="Delete selected">⌫<span>Delete</span></button>
-    <button id="cropHelpBtn" class="tool" title="Crop tips">⌗<span>Crop</span></button>
-    <input type="file" id="fileInput" accept="image/*" hidden>
-  </aside>
-  <main class="workspace">
-    <div class="canvas-toolbar">
-      <span id="status">Open an image or start with a blank canvas.</span>
-      <div><button id="fitBtn">Fit</button><button id="bgBtn">Canvas colour</button><input type="color" id="bgColor" value="#ffffff" aria-label="Canvas colour"></div>
-    </div>
-    <div id="stage">
-      <canvas id="editorCanvas" width="1000" height="650"></canvas>
-      <div id="emptyHint"><div class="empty-icon">▧</div><h2>Your canvas is ready</h2><p>Open a photo, or add text and shapes to begin.</p><button id="emptyOpenBtn" class="primary">Open a photo</button></div>
-    </div>
-  </main>
-  <aside class="right-panel">
-    <section class="panel-section">
-      <h3>Text & style</h3>
-      <label for="textValue">Text content</label>
-      <textarea id="textValue" rows="3" placeholder="Type Gujarati, Hindi or English…"></textarea>
-      <button id="applyTextBtn" class="wide">Apply to selected text</button>
-      <div class="field-row"><div><label for="fontFamily">Font</label><select id="fontFamily"><option>Arial</option><option>Georgia</option><option>Verdana</option><option>Tahoma</option><option>Impact</option><option>sans-serif</option></select></div>
-      <div><label for="fontSize">Size</label><input id="fontSize" type="number" min="8" max="220" value="48"></div></div>
-      <div class="field-row"><div><label for="fillColor">Text / fill</label><input id="fillColor" type="color" value="#183b72"></div><div><label for="strokeColor">Outline</label><input id="strokeColor" type="color" value="#ffffff"></div></div>
-      <button id="addTextBtn" class="wide">＋ Add text</button>
-    </section>
-    <section class="panel-section">
-      <h3>Image</h3>
-      <button id="cropBtn" class="wide">Crop to selection</button>
-      <p class="help">Select an image, then use its corner handles to resize or rotate. Crop uses the selected object's visible bounds.</p>
-      <div class="field-row"><div><label for="brightness">Brightness</label><input id="brightness" type="range" min="-0.5" max="0.5" step="0.05" value="0"></div><div><label for="contrast">Contrast</label><input id="contrast" type="range" min="-0.5" max="0.5" step="0.05" value="0"></div></div>
-      <button id="applyFiltersBtn" class="wide">Apply image adjustments</button>
-    </section>
-    <section class="panel-section layers-section">
-      <h3>Layers <span id="layerCount">0</span></h3>
-      <div class="layer-actions"><button id="upBtn" title="Bring forward">↑ Forward</button><button id="downBtn" title="Send backward">↓ Back</button></div>
-      <div id="layersList" class="layers-list"><p class="help">Your objects will appear here.</p></div>
-    </section>
-  </aside>
-</div>
-<footer>PV Photo Studio • Starter version • Your files stay in your browser until you export them.</footer>
-<script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js"></script>
-<script src="app.js"></script>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PV Photo Studio Pro</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script></head><body>
+<header><div class="brand"><b>PV</b><span><strong>PV Photo Studio Pro</strong><small>Photo editor + poster designer</small></span></div><div class="actions"><button id="newBtn">New</button><button id="openBtn">Open photo</button><button id="pngBtn" class="primary">Export PNG</button><button id="jpgBtn">Export JPG</button></div></header><input id="fileInput" type="file" accept="image/*" hidden>
+<main><nav><button data-panel="design" class="active">✦<small>Design</small></button><button data-panel="text">T<small>Text</small></button><button data-panel="shapes">▱<small>Shapes</small></button><button data-panel="adjust">◐<small>Adjust</small></button><button data-panel="layers">▤<small>Layers</small></button></nav>
+<aside>
+<section id="panel-design" class="panel active"><h2>Poster design</h2><label>Canvas size</label><select id="preset"><option value="1080,1080">Square 1080 × 1080</option><option value="1200,630">Facebook landscape 1200 × 630</option><option value="1080,1350">Portrait 1080 × 1350</option><option value="1920,1080">Wide 1920 × 1080</option></select><button id="applySize" class="wide">Apply size</button><hr><h3>Quick poster</h3><label>Headline / હેડલાઇન</label><input id="headline" placeholder="જમીન વેચવાની છે"><label>Details / વિગતો</label><textarea id="details" rows="3" placeholder="ગામ, તાલુકો, વિસ્તાર અને ભાવ"></textarea><label>Contact / સંપર્ક</label><input id="contact" value="PV Property · 7984667329"><button id="poster" class="wide primary">Create poster text</button></section>
+<section id="panel-text" class="panel"><h2>Text tools</h2><label>Text / લખાણ</label><textarea id="text" rows="3" placeholder="અહીં ગુજરાતી લખો..."></textarea><label>Font</label><select id="font"><option>Noto Sans Gujarati</option><option>Inter</option><option>Arial</option><option>serif</option></select><div class="row"><div><label>Size</label><input id="size" type="number" value="48" min="8" max="300"></div><div><label>Colour</label><input id="textColor" type="color" value="#ffffff"></div></div><div class="row"><button id="bold">Bold</button><button id="shadow">Shadow</button></div><button id="addText" class="wide primary">Add text</button><button id="updateText" class="wide">Update selected text</button></section>
+<section id="panel-shapes" class="panel"><h2>Shapes & background</h2><label>Shape colour</label><input id="shapeColor" type="color" value="#1976d2"><div class="grid"><button id="rect">Rectangle</button><button id="circle">Circle</button><button id="line">Line</button><button id="border">Border</button></div><label>Canvas background</label><input id="bg" type="color" value="#ffffff"><button id="applyBg" class="wide">Apply background</button><button id="delete" class="wide danger">Delete selected</button></section>
+<section id="panel-adjust" class="panel"><h2>Photo adjustments</h2><p>Select a photo layer first.</p><label>Brightness <output id="bo">0</output></label><input id="brightness" type="range" min="-.5" max=".5" step=".05" value="0"><label>Contrast <output id="co">0</output></label><input id="contrast" type="range" min="-.5" max=".5" step=".05" value="0"><label>Saturation <output id="so">0</output></label><input id="saturation" type="range" min="-1" max="1" step=".1" value="0"><div class="grid"><button id="gray">Grayscale</button><button id="reset">Reset filters</button></div></section>
+<section id="panel-layers" class="panel"><h2>Layers</h2><div class="grid"><button id="front">Bring forward</button><button id="back">Send backward</button><button id="hide">Hide/show</button><button id="lock">Lock/unlock</button></div><div id="layers"></div></section></aside>
+<section class="workspace"><div class="status"><span id="status">Ready — open a photo or start a poster.</span><span><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button></span></div><div id="stage"><canvas id="editorCanvas" width="1080" height="1080"></canvas></div><p class="hint">Mobile tip: use the panels, then drag objects with your finger.</p></section></main><footer>PV Photo Studio Pro · Starter edition · Internet required for editor library and online fonts</footer><script src="app.js"></script></body></html>
