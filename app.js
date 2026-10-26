@@ -1,0 +1,287 @@
+const canvas = new fabric.Canvas('editorCanvas', {
+  preserveObjectStacking: true,
+  backgroundColor: '#ffffff',
+  selection: true
+});
+
+const $ = id => document.getElementById(id);
+let undoStack = [];
+let redoStack = [];
+let restoring = false;
+
+function status(msg) {
+  const el = $('status');
+  if (el) el.textContent = msg;
+}
+
+function refreshLayers() {
+  const list = $('layersList');
+  if (!list) return;
+
+  list.innerHTML = '';
+  const objects = canvas.getObjects().slice().reverse();
+
+  if ($('layerCount')) $('layerCount').textContent = objects.length;
+
+  objects.forEach(obj => {
+    const btn = document.createElement('button');
+    btn.textContent = obj.text || obj.name || obj.type;
+    btn.className = 'layer-item';
+
+    btn.onclick = () => {
+      canvas.setActiveObject(obj);
+      canvas.requestRenderAll();
+      refreshLayers();
+    };
+
+    list.appendChild(btn);
+  });
+}
+
+function saveHistory() {
+  if (restoring) return;
+
+  const state = JSON.stringify(canvas.toJSON());
+
+  if (undoStack[undoStack.length - 1] !== state) {
+    undoStack.push(state);
+    if (undoStack.length > 30) undoStack.shift();
+  }
+
+  redoStack = [];
+}
+
+function openFile() {
+  $('fileInput').click();
+}
+
+$('openBtn').onclick = openFile;
+
+if ($('emptyOpenBtn')) {
+  $('emptyOpenBtn').onclick = openFile;
+}
+
+$('fileInput').addEventListener('change', function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (event) {
+    fabric.Image.fromURL(event.target.result, function (img) {
+      const maxWidth = 1200;
+      const maxHeight = 850;
+      const scale = Math.min(
+        maxWidth / img.width,
+        maxHeight / img.height,
+        1
+      );
+
+      canvas.clear();
+      canvas.setDimensions({
+        width: Math.round(img.width * scale),
+        height: Math.round(img.height * scale)
+      });
+
+      img.set({
+        left: 0,
+        top: 0,
+        scaleX: scale,
+        scaleY: scale,
+        name: file.name
+      });
+
+      canvas.add(img);
+      canvas.setActiveObject(img);
+      canvas.renderAll();
+
+      if ($('emptyHint')) $('emptyHint').style.display = 'none';
+
+      refreshLayers();
+      saveHistory();
+      status('Photo opened successfully!');
+    });
+  };
+
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+$('selectBtn').onclick = function () {
+  canvas.selection = true;
+  status('Select and move objects.');
+};
+
+$('textBtn').onclick = addText;
+
+if ($('addTextBtn')) $('addTextBtn').onclick = addText;
+
+function addText() {
+  const text = ($('textValue') && $('textValue').value) || 'Your text here';
+
+  const obj = new fabric.Textbox(text, {
+    left: 50,
+    top: 50,
+    width: Math.min(500, canvas.getWidth() - 40),
+    fontSize: Number($('fontSize')?.value) || 40,
+    fontFamily: $('fontFamily')?.value || 'Arial',
+    fill: $('fillColor')?.value || '#183b72'
+  });
+
+  canvas.add(obj);
+  canvas.setActiveObject(obj);
+  canvas.renderAll();
+  refreshLayers();
+  saveHistory();
+  status('Text added.');
+}
+
+if ($('applyTextBtn')) {
+  $('applyTextBtn').onclick = function () {
+    const obj = canvas.getActiveObject();
+    if (!obj || !obj.text) {
+      status('Select a text object first.');
+      return;
+    }
+
+    obj.set({
+      text: $('textValue').value,
+      fontSize: Number($('fontSize').value) || 40,
+      fontFamily: $('fontFamily').value,
+      fill: $('fillColor').value
+    });
+
+    canvas.requestRenderAll();
+    saveHistory();
+    refreshLayers();
+  };
+}
+
+$('rectBtn').onclick = function () {
+  const rect = new fabric.Rect({
+    left: 60,
+    top: 60,
+    width: 200,
+    height: 120,
+    fill: $('fillColor')?.value || '#3478db',
+    stroke: $('strokeColor')?.value || '#ffffff',
+    strokeWidth: 2
+  });
+
+  canvas.add(rect);
+  canvas.setActiveObject(rect);
+  canvas.requestRenderAll();
+  refreshLayers();
+  saveHistory();
+  status('Shape added.');
+};
+
+$('deleteBtn').onclick = function () {
+  const obj = canvas.getActiveObject();
+
+  if (obj) {
+    canvas.remove(obj);
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+    refreshLayers();
+    saveHistory();
+    status('Object deleted.');
+  }
+};
+
+$('upBtn').onclick = function () {
+  const obj = canvas.getActiveObject();
+  if (obj) {
+    canvas.bringForward(obj);
+    canvas.requestRenderAll();
+    saveHistory();
+    refreshLayers();
+  }
+};
+
+$('downBtn').onclick = function () {
+  const obj = canvas.getActiveObject();
+  if (obj) {
+    canvas.sendBackwards(obj);
+    canvas.requestRenderAll();
+    saveHistory();
+    refreshLayers();
+  }
+};
+
+$('undoBtn').onclick = function () {
+  if (undoStack.length < 2) return;
+
+  redoStack.push(undoStack.pop());
+  restoring = true;
+
+  canvas.loadFromJSON(undoStack[undoStack.length - 1], function () {
+    canvas.renderAll();
+    restoring = false;
+    refreshLayers();
+  });
+};
+
+$('redoBtn').onclick = function () {
+  if (!redoStack.length) return;
+
+  const state = redoStack.pop();
+  undoStack.push(state);
+  restoring = true;
+
+  canvas.loadFromJSON(state, function () {
+    canvas.renderAll();
+    restoring = false;
+    refreshLayers();
+  });
+};
+
+$('exportBtn').onclick = function () {
+  const link = document.createElement('a');
+  link.download = 'pv-photo-studio.png';
+  link.href = canvas.toDataURL({
+    format: 'png',
+    multiplier: 1
+  });
+
+  link.click();
+  status('PNG downloaded.');
+};
+
+if ($('bgColor')) {
+  $('bgColor').addEventListener('input', function () {
+    canvas.setBackgroundColor(
+      this.value,
+      canvas.renderAll.bind(canvas)
+    );
+    saveHistory();
+  });
+}
+
+if ($('bgBtn')) {
+  $('bgBtn').onclick = function () {
+    $('bgColor').click();
+  };
+}
+
+canvas.on('object:added', function () {
+  refreshLayers();
+  if (!restoring) saveHistory();
+});
+
+canvas.on('object:modified', function () {
+  refreshLayers();
+  saveHistory();
+});
+
+canvas.on('object:removed', refreshLayers);
+
+canvas.setDimensions({
+  width: 1000,
+  height: 650
+});
+
+canvas.renderAll();
+refreshLayers();
+saveHistory();
+status('Ready. Open a photo to begin.');
